@@ -32,8 +32,11 @@ class DataBase{
     private $user;
     private $database;
     private $password;
+    private $tableName;
 
-    public function __construct($name, $surname, $date, $city, $gender, $host, $database, $password, $user)
+    private $connection;
+
+    public function __construct($name, $surname, $date, $city, $gender, $host, $database, $password, $user, $tableName)
     {
         $this->name = $name;
         $this->surname = $surname;
@@ -45,25 +48,36 @@ class DataBase{
         $this->database = $database;
         $this->password = $password;
         $this->user = $user;
+
+        $this->tableName = $tableName;
+
     }
 
     public function connect($host, $database, $password, $user){
 
-        $connection = mysqli_connect($this->host, $this->user, $this->password, $this->database);
-        if($connection == true){
+        $this->connection = mysqli_connect($this->host, $this->user, $this->password, $this->database);
+        if($this->connection == true){
             echo 'соединение установлено';
+            return $this->connection;
         }
         else{
             echo 'Ошибка соединения'. mysqli_error();
         }
     }
 
-    public function saveToDB($name, $surname, $date, $gender, $city)
+    public function saveToDB($tableName)
     {
-
+        $sql = "INSERT INTO " . $tableName . " (name, surname, born_date, gender, birth_city)
+            VALUES ('".$this->name."', '".$this->surname."', '".$this->date."', '".$this->gender."', '".$this->city."')";
+        if (!$result = $this->connection->query($sql)){
+            die('ошибка выполнения запроса'. $this->connection->error);
+        }
     }
+
 }
 
-$connection = new DataBase('Юра', 'Боричевский', '09-12-1997', 'Пинск', '0', 'localhost', 'lessonDB', '', 'root');
+$connection = new DataBase('Юра', 'Боричевский', '1997-12-09', 'Пинск', '0', 'localhost', 'lessonDB', '', 'root', 'userTable');
 
 $connection -> connect('localhost', 'lessonDB', '', 'root');
+
+$connection -> saveToDB('userTable');
